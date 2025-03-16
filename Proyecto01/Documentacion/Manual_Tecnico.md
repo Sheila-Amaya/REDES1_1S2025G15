@@ -30,27 +30,57 @@ Tabla de direccionamiento:
   </thead>
   <tbody>
     <tr>
-      <td>1X</td>
+      <td>13</td>
       <td>Ventas</td>
-      <td>192.168.1X.0/24</td>
+      <td>192.168.13.0/24</td>
     </tr>
     <tr>
-      <td>2X</td>
+      <td>23</td>
       <td>Soporte</td>
-      <td>192.168.2X.0/24</td>
+      <td>192.168.23.0/24</td>
     </tr>
     <tr>
-      <td>3X</td>
+      <td>33</td>
       <td>Gerencia</td>
-      <td>192.168.3X.0/24</td>
+      <td>192.168.33.0/24</td>
     </tr>
     <tr>
-      <td>4X</td>
+      <td>43</td>
       <td>Seguridad</td>
-      <td>192.168.4X.0/24</td>
+      <td>192.168.43.0/24</td>
     </tr>
   </tbody>
 </table>
+
+
+| **Vlan** | **Dispositivo** | **IP Asignada** | **Switch Conectado** |
+|----------|-----------------|-----------------|----------------------|
+|  11      | VENTAS 1        | 192.168.13.11   | SW4                  |
+|  11      | VENTAS 2        | 192.168.13.12   | SW8                  |
+|  11      | VENTAS 3        | 192.168.13.13   | SW10                 |
+|  11      | VENTAS 4        | 192.168.13.14   | SW7                  |
+|  11      | VENTAS 5        | 192.168.13.15   | SW1                  |
+|  21      | SOPORTE 1       | 192.168.23.11   | SW3                  |
+|  21      | SOPORTE 2       | 192.168.23.12   | SW9                  |
+|  21      | SOPORTE 3       | 192.168.23.13   | SW10                 |
+|  21      | SOPORTE 4       | 192.168.23.14   | SW6                  |
+|  21      | SOPORTE 5       | 192.168.23.15   | SW11                 |
+|  31      | GERENCIA 1      | 192.168.33.11   | SW4                  |
+|  31      | GERENCIA 2      | 192.168.33.12   | SW1                  |
+|  31      | GERENCIA 3      | 192.168.33.13   | SW13                 |
+|  31      | GERENCIA 4      | 192.168.33.14   | SW12                 |
+|  31      | GERENCIA 5      | 192.168.33.15   | SW10                 |
+|  41      | SEGURIDAD 1     | 192.168.43.11   | SW2                  |
+|  41      | SEGURIDAD 2     | 192.168.43.12   | SW8                  |
+|  41      | SEGURIDAD 3     | 192.168.43.13   | SW11                 |
+|  41      | SEGURIDAD 5     | 192.168.43.15   | SW6                  |
+|  41      | SEGURIDAD 6     | 192.168.43.16   | SW7                  |
+|  41      | SEGURIDAD 7     | 192.168.43.17   | SW9                  |
+|  51      | RECEPCION 1     | 192.168.53.11   | SW5                  |
+|  51      | RECEPCION 2     | 192.168.53.12   | SW5                  |
+|  51      | RECEPCION 3     | 192.168.53.13   | SW5                  |
+|  51      | RECEPCION 4     | 192.168.53.14   | SW5                  |
+
 
 Cada PC ha sido asignada a una VLAN específica y cuenta con una dirección IP en la subred correspondiente con máscara 255.255.255.0.
 
@@ -59,7 +89,7 @@ Cada PC ha sido asignada a una VLAN específica y cuenta con una dirección IP e
 ```bash
     enable
     configure terminal
-    vtp domain G#_technet
+    vtp domain G15_technet
     vtp password secure2025
     vtp mode server
     spanning-tree mode pvst
@@ -70,13 +100,13 @@ Cada PC ha sido asignada a una VLAN específica y cuenta con una dirección IP e
 ```bash
 enable
 configure terminal
-vlan 1X
+vlan 13
  name Ventas
-vlan 2X
+vlan 23
  name Soporte
-vlan 3X
+vlan 33
  name Gerencia
-vlan 4X
+vlan 43
  name Seguridad
 exit
 ```
@@ -114,67 +144,15 @@ show interfaces trunk
 ```
 
 ### **Configuración**
-#### **VTP en cada switch**
-
-**Servidor:**
-<p align="center">
-  <img src="./img/vtp_servidor.png" alt="VTP en Servidor" width="350px">
-</p>
-
-**Transparente:**
-<p align="center">
-  <img src="./img/vtp_transparente.png" alt="VTP en Transparente" width="350px">
-</p>
-
-**Cliente01:**
-<p align="center">
-  <img src="./img/vtp_cliente01.png" alt="VTP en Cliente01" width="350px">
-</p>
-
-**Cliente02:**
-<p align="center">
-  <img src="./img/vtp_cliente02.png" alt="VTP en Cliente02" width="350px">
-</p>
-
-#### **Capturas de VLANs en cada switch**
-
-**Servidor:**
-<p align="center">
-  <img src="./img/vlan_servidor.png" alt="VLANs en Servidor" width="350px">
-</p>
-
-**Transparente:**
-<p align="center">
-  <img src="./img/vlan_trasparente.png" alt="VLANs en Transparente" width="350px">
-</p>
-
-**Cliente01:**
-<p align="center">
-  <img src="./img/vlan_cliente01.png" alt="VLANs en Cliente01" width="350px">
-</p>
-
-**Cliente02:**
-<p align="center">
-  <img src="./img/vlan_cliente02.png" alt="VLANs en Cliente02" width="350px">
-</p>
-
 #### **Pruebas de Conectividad (Ping)**
  - Ping en VLAN (Ventas)
-<p align="center">
-  <img src="./img/ping_vlan_ventas.png" alt="Ping ventas" width="450px">
-</p>
+![alt text](image-3.png)
 
  - Ping en VLAN (Soporte)
-<p align="center">
-  <img src="./img/ping_vlan_soporte.png" alt="Ping soporte" width="450px">
-</p>
+![alt text](image-2.png)
 
  - Ping en VLAN (Gerencia)
-<p align="center">
-  <img src="./img/ping_vlan_gerencia.png" alt="Ping gerencia" width="450px">
-</p>
+![alt text](image-4.png)
 
  - Ping en VLAN (Seguridad)
-<p align="center">
-  <img src="./img/ping_vlan_seguridad.png" alt="Ping seguridad" width="450px">
-</p>
+![alt text](image-5.png)
