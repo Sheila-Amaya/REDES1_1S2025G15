@@ -6,7 +6,7 @@
 
 #### MANUAL TÉCNICO
 
-#### Integrantes:
+### Integrantes:
 
 <table>
   <thead>
@@ -27,10 +27,10 @@
   </tbody>
 </table>
 
-#### Descripción General
+### Descripción General
 Este proyecto consiste en el diseño, segmentación y configuración de una topología de red para interconectar las sedes de la Universidad de San Carlos de Guatemala. Se aplican técnicas de VLAN, VLSM/FLSM, enrutamiento estático y dinámico (RIP, OSPF, EIGRP), y protocolos de redundancia como HSRP/VRRP.
 
-####  Topología General
+###  Topología General
 Incluye la interconexión de:
 
 - CUNDECH
@@ -45,7 +45,7 @@ Incluye la interconexión de:
  </p>
  
 
-#### VLSM por sede
+### VLSM por sede
 Para cada sede se aplicó VLSM, asignando subredes según el número de equipos por área (estudiantes, docentes, biblioteca, seguridad).
 
 - CUNDECH
@@ -390,8 +390,7 @@ Para cada sede se aplicó VLSM, asignando subredes según el número de equipos 
 </table>
 
 
-
-#### FLSM - CORE/BACKBONE
+### FLSM - CORE/BACKBONE
 Se implementó FLSM con subredes /30 para los 18 enlaces punto a punto del backbone utilizando el rango 10.0.0.0/24.
 
  <p align="center">
@@ -439,4 +438,9 @@ Se implementó FLSM con subredes /30 para los 18 enlaces punto a punto del backb
   </tbody>
 </table>
 
+### Comandos utilizados
 
+- Comandos utilizados por router y switch  
+- Asignaciones IP por VLAN  
+- Configuración de Router-on-a-Stick, HSRP, VRRP, EtherChannel  
+- Configuración de VTP por sede  
