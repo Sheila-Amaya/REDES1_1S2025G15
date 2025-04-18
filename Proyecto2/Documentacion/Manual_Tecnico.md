@@ -438,6 +438,78 @@ Se implementó FLSM con subredes /30 para los 18 enlaces punto a punto del backb
   </tbody>
 </table>
 
+### Asignación de Direcciones IP por Sede
+
+<h6>CUNDECH</h6>
+<table>
+  <thead>
+    <tr><th>Dispositivo</th><th>VLAN</th><th>IP Asignada</th><th>Máscara</th><th>Gateway</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Estudiantes6 (laptop)</td><td>13</td><td>192.168.15.130</td><td>255.255.255.192</td><td>192.168.15.129</td></tr>
+    <tr><td>Estudiantes7 (laptop)</td><td>13</td><td>192.168.15.131</td><td>255.255.255.192</td><td>192.168.15.129</td></tr>
+    <tr><td>Docentes6 (PC)</td><td>23</td><td>192.168.15.194</td><td>255.255.255.224</td><td>192.168.15.193</td></tr>
+    <tr><td>Docentes7 (PC)</td><td>23</td><td>192.168.15.195</td><td>255.255.255.224</td><td>192.168.15.193</td></tr>
+    <tr><td>Seguridad2 (PC)</td><td>33</td><td>192.168.15.226</td><td>255.255.255.248</td><td>192.168.15.225</td></tr>
+    <tr><td>Biblioteca3 (PC)</td><td>43</td><td>192.168.15.2</td><td>255.255.255.128</td><td>192.168.15.1</td></tr>
+    <tr><td>Biblioteca4 (PC)</td><td>43</td><td>192.168.15.3</td><td>255.255.255.128</td><td>192.168.15.1</td></tr>
+  </tbody>
+</table>
+
+<h6>CENTRAL</h6>
+<table>
+  <thead>
+    <tr><th>Servidor</th><th>IP Asignada</th><th>Máscara</th><th>Gateway</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Server0</td><td>192.123.15.2</td><td>255.255.255.192</td><td>192.123.15.1</td></tr>
+    <tr><td>Server1</td><td>192.123.15.66</td><td>255.255.255.192</td><td>192.123.15.65</td></tr>
+    <tr><td>Server2</td><td>192.123.15.130</td><td>255.255.255.248</td><td>192.123.15.129</td></tr>
+  </tbody>
+</table>
+
+<h6>CUNOROC</h6>
+<table>
+  <thead>
+    <tr><th>Dispositivo</th><th>VLAN</th><th>IP Asignada</th><th>Máscara</th><th>Gateway</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Biblioteca1 (PC)</td><td>43</td><td>192.148.15.2</td><td>255.255.255.128</td><td>192.148.15.1</td></tr>
+    <tr><td>Estudiantes3 (PC)</td><td>13</td><td>192.148.15.130</td><td>255.255.255.192</td><td>192.148.15.129</td></tr>
+    <tr><td>Docentes3 (PC)</td><td>23</td><td>192.148.15.194</td><td>255.255.255.224</td><td>192.148.15.193</td></tr>
+    <tr><td>Seguridad3 (PC)</td><td>33</td><td>192.148.15.226</td><td>255.255.255.240</td><td>192.148.15.225</td></tr>
+  </tbody>
+</table>
+
+<h6>CUNOC</h6>
+<table>
+  <thead>
+    <tr><th>Dispositivo</th><th>VLAN</th><th>IP Asignada</th><th>Máscara</th><th>Gateway</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Estudiantes1 (PC)</td><td>13</td><td>172.16.15.66</td><td>255.255.255.192</td><td>172.16.15.65</td></tr>
+    <tr><td>Estudiantes2 (Laptop)</td><td>13</td><td>172.16.15.67</td><td>255.255.255.192</td><td>172.16.15.65</td></tr>
+    <tr><td>Docentes1 (PC)</td><td>23</td><td>172.16.15.130</td><td>255.255.255.192</td><td>172.16.15.129</td></tr>
+    <tr><td>Docentes2 (PC)</td><td>23</td><td>172.16.15.131</td><td>255.255.255.192</td><td>172.16.15.129</td></tr>
+    <tr><td>Seguridad4 (PC)</td><td>33</td><td>172.16.15.194</td><td>255.255.255.248</td><td>172.16.15.193</td></tr>
+  </tbody>
+</table>
+
+<h6>CUM</h6>
+<table>
+  <thead>
+    <tr><th>Dispositivo</th><th>VLAN</th><th>IP Asignada</th><th>Máscara</th><th>Gateway</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Estudiante5 (PC)</td><td>13</td><td>192.158.15.130</td><td>255.255.255.192</td><td>192.158.15.129</td></tr>
+    <tr><td>Docentes5 (Laptop)</td><td>23</td><td>192.158.15.194</td><td>255.255.255.224</td><td>192.158.15.193</td></tr>
+    <tr><td>Seguridad1 (PC)</td><td>33</td><td>192.158.15.226</td><td>255.255.255.240</td><td>192.158.15.225</td></tr>
+    <tr><td>Biblioteca2 (PC)</td><td>43</td><td>192.158.15.2</td><td>255.255.255.128</td><td>192.158.15.1</td></tr>
+  </tbody>
+</table>
+
+
+
 ### Comandos utilizados
 
 - Comandos utilizados por router y switch  
