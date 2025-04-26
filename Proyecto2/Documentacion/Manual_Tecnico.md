@@ -41,7 +41,7 @@ Incluye la interconexión de:
 - CORE/BACKBONE
 
  <p align="center">
-   <img src="./img/topologia.png" alt="topologia" width="850px">
+   <img src="./img/topologia.png" alt="topologia" width="950px">
  </p>
  
 
@@ -394,7 +394,7 @@ Para cada sede se aplicó VLSM, asignando subredes según el número de equipos 
 Se implementó FLSM con subredes /30 para los 18 enlaces punto a punto del backbone utilizando el rango 10.0.0.0/24.
 
  <p align="center">
-   <img src="./img/backbone.png" alt="backbone" width="850px">
+   <img src="./img/backbone.png" alt="backbone" width="950px">
  </p>
  
 
@@ -515,39 +515,12 @@ Se implementó FLSM con subredes /30 para los 18 enlaces punto a punto del backb
 SW6
 ```bash
 enable
-configure terminal
-
-vtp domain Grupo15
-vtp password usac2025
-vtp mode client
-
-interface fa0/3
-switchport mode access
-switchport access vlan 33
-
-interface range fa0/4 - 5
-switchport mode access
-switchport access vlan 43
-
-interface fa0/1
-switchport mode trunk
-
-interface fa0/2
-switchport mode trunk
-
-end
-write memory
-
-```
-CUNDECH
-SW7
-```bash
-enable
-configure terminal
-
-vtp domain Grupo15
-vtp password usac2025
+conf t
+hostname SW5
+vtp version 2
 vtp mode server
+vtp domain Grupo15
+vtp password usac2025
 
 vlan 13
 name Estudiantes
@@ -558,59 +531,118 @@ name Seguridad
 vlan 43
 name Biblioteca
 
-interface range fa0/4 - 5
-switchport mode access
-switchport access vlan 13
-
-interface fa0/1
+interface range fa0/1-2
 switchport mode trunk
-
-interface fa0/2
-switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+exit
 
 interface fa0/3
-switchport mode trunk
+switchport mode access
+switchport access vlan 43
+exit
 
-end
-write memory
+interface fa0/4
+switchport mode access
+switchport access vlan 13
+exit
+
+interface fa0/5
+switchport mode access
+switchport access vlan 33
+exit
+
+interface fa0/6
+switchport mode access
+switchport access vlan 23
+exit
+
+exit
+wr
+```
+CUNDECH
+SW7
+```bash
+enable
+conf t
+hostname SW8
+vtp version 2
+vtp mode client
+vtp domain Grupo15
+vtp password usac2025
+
+interface range fa0/1-2
+switchport mode trunk 
+switchport trunk allowed vlan 13,23,33,43
+exit
+
+interface range fa0/3-4
+switchport mode access 
+switchport access vlan 23
+exit
+
+
+exit
+wr
 
 ```
 
 SW8
 ```bash
 enable
-configure terminal
-
-vtp domain Grupo15
-vtp password usac2025
+conf t
+hostname SW8
+vtp version 2
 vtp mode client
-
-interface range fa0/3 - 4
-switchport mode access
-switchport access vlan 23
-
+vtp domain Grupo5
+vtp password usac2025
 interface fa0/1
-switchport mode trunk
-
+switchport mode access 
+switchport access vlan 24
+exit
 interface fa0/2
-switchport mode trunk
-
-end
-write memory
-
+switchport mode trunk 
+switchport trunk allowed vlan 14,24,34,44
+exit
+interface fa0/3
+switchport mode access 
+switchport access vlan 24
+exit
+interface fa0/4
+switchport mode trunk 
+switchport trunk allowed vlan 14,24,34,44
+exit
+exit
+wr
 ```
 
 MS8
 ```bash
 enable
-configure terminal
-
+conf t
+hostname MS8
+no ip domain-lookup
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
-vtp version 2
 
-ip routing
+interface range fa0/2-4
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+no shutdown
+exit
+
+interface fa0/1
+no switchport
+ip address 10.0.0.66 255.255.255.252
+no shutdown
+exit
+
+! Configuración de interfaces virtuales para cada VLAN
+interface vlan 43
+ip address 192.168.15.1 255.255.255.128
+no shutdown
 
 interface vlan 13
 ip address 192.168.15.129 255.255.255.192
@@ -624,35 +656,20 @@ interface vlan 33
 ip address 192.168.15.225 255.255.255.248
 no shutdown
 
-interface vlan 43
-ip address 192.168.15.1 255.255.255.128
-no shutdown
+! Habilitación de routing
+ip routing
 
-interface fa0/2
-switchport trunk encapsulation dot1q
-switchport mode trunk
-
-interface fa0/3
-switchport trunk encapsulation dot1q
-switchport mode trunk
-
-interface fa0/4
-switchport trunk encapsulation dot1q
-switchport mode trunk
-
-interface fa0/1
-no switchport
-ip address 10.0.0.66 255.255.255.252
-no shutdown
-
-router eigrp 15
+! Configuración de EIGRP
+router eigrp 10
 network 10.0.0.64 0.0.0.3
-network 192.168.15.0 0.0.0.255
+network 192.168.15.0 0.0.0.127
+network 192.168.15.128 0.0.0.63
+network 192.168.15.192 0.0.0.31
+network 192.168.15.224 0.0.0.7
 no auto-summary
 
 end
-write memory
-
+wr
 ```
 
 EIGRP
@@ -660,46 +677,55 @@ EIGRP
 R10
 ```bash
 enable
-configure terminal
+conf t
+hostname R10
+no ip domain-lookup
 
-interface GigabitEthernet0/0
-ip address 10.0.0.62 255.255.255.252
-no shutdown
-
-interface GigabitEthernet0/1
+interface gi0/1
 ip address 10.0.0.65 255.255.255.252
 no shutdown
+exit
 
-router eigrp 15
+interface gi0/0
+ip address 10.0.0.62 255.255.255.252
+no shutdown
+exit
+
+router eigrp 10
 network 10.0.0.60 0.0.0.3
 network 10.0.0.64 0.0.0.3
 no auto-summary
 
 end
-write memory
+wr
 
 ```
 
 R9
 ```bash
 enable
-configure terminal
+conf t
+hostname R9
+no ip domain-lookup
 
-interface GigabitEthernet0/0
-ip address 10.0.0.58 255.255.255.252
-no shutdown
-
-interface GigabitEthernet0/1
+interface gi0/1
 ip address 10.0.0.61 255.255.255.252
 no shutdown
+exit
 
-router eigrp 15
+interface gi0/0
+ip address 10.0.0.58 255.255.255.252
+no shutdown
+exit
+
+! Configuración de EIGRP
+router eigrp 10
 network 10.0.0.56 0.0.0.3
 network 10.0.0.60 0.0.0.3
 no auto-summary
 
 end
-write memory
+wr
 
 ```
 
@@ -707,432 +733,586 @@ OSPF
 MS7
   ```bash
 enable
-configure terminal
+conf t
+hostname MS7
+no ip domain-lookup
 
-vtp domain Grupo15
-vtp password usac2025
-vtp mode client
-vtp version 2
-
-ip routing
-
-default interface range fa0/4 - 6
-interface range fa0/4 - 6
-no switchport
-channel-group 11 mode active
-no shutdown
-exit
-
-interface port-channel11
-no switchport
-ip address 10.0.0.42 255.255.255.252
-no shutdown
-
-interface range fa0/1 - 3
-no switchport
-channel-group 12 mode active
-no shutdown
-exit
-
-interface port-channel12
-no switchport
-ip address 10.0.0.45 255.255.255.252
-no shutdown
-
+! a R9
 interface fa0/7
 no switchport
 ip address 10.0.0.57 255.255.255.252
 no shutdown
+exit
 
+interface port-channel 2
+no switchport
+ip address 10.0.0.45 255.255.255.252
+no shutdown
+exit
+
+interface range fa0/1-3
+no switchport
+channel-group 2 mode active
+no shutdown
+exit
+
+interface port-channel 1
+no switchport
+ip address 10.0.0.42 255.255.255.252
+no shutdown
+exit
+
+interface range fa0/4-6
+no switchport
+channel-group 1 mode active
+no shutdown
+exit
+
+! Habilitación de routing
+ip routing
+
+! Configuración de EIGRP con redistribución desde OSPF
+router eigrp 10
+network 10.0.0.40 0.0.0.3
+network 10.0.0.44 0.0.0.3
+network 10.0.0.56 0.0.0.3
+redistribute ospf 1 metric 10000 100 255 1 1500
+no auto-summary
+exit
+
+! Configuración de OSPF con redistribución desde EIGRP
 router ospf 1
-router-id 10.0.0.42
 network 10.0.0.40 0.0.0.3 area 0
 network 10.0.0.44 0.0.0.3 area 0
-redistribute eigrp 15 subnets
-
-router eigrp 15
-network 10.0.0.56 0.0.0.3
-network 10.0.0.60 0.0.0.3
-redistribute ospf 1 metric 10000 1 255 1 1500
-no auto-summary
+redistribute eigrp 10 subnets
+exit
 
 end
-write memory
-
+wr
 ```
 
 MS5
 ```bash
 enable
-configure terminal
+conf t
+hostname MS5
+no ip domain-lookup
 
-vtp domain Grupo15
-vtp password usac2025
-vtp mode client
-vtp version 2
-
-ip routing
-
-default interface range fa0/4 - 6
-interface range fa0/4 - 6
-no switchport
-channel-group 9 mode active
-no shutdown
-exit
-
-interface port-channel9
-no switchport
-ip address 10.0.0.33 255.255.255.252
-no shutdown
-
-default interface range fa0/1 - 3
-interface range fa0/1 - 3
-no switchport
-channel-group 11 mode active
-no shutdown
-exit
-
-interface port-channel11
+interface port-channel 1
 no switchport
 ip address 10.0.0.41 255.255.255.252
 no shutdown
+exit
 
+interface range fa0/1-3
+no switchport
+channel-group 1 mode active
+no shutdown
+exit
+
+interface port-channel 2
+no switchport
+ip address 10.0.0.34 255.255.255.252
+no shutdown
+exit
+
+interface range fa0/4-6
+no switchport
+channel-group 2 mode active
+no shutdown
+exit
+
+! Interfaz hacia R7
 interface fa0/7
 no switchport
 ip address 10.0.0.70 255.255.255.252
 no shutdown
+exit
 
-ip route 192.123.15.0 255.255.255.0 10.0.0.70
+ip routing
+
+ip route 192.120.15.0 255.255.255.0 10.0.0.69
+ip route 192.121.15.0 255.255.255.0 10.0.0.69
+ip route 192.122.15.0 255.255.255.0 10.0.0.69
 
 router ospf 1
-router-id 10.0.0.33
 network 10.0.0.32 0.0.0.3 area 0
 network 10.0.0.40 0.0.0.3 area 0
+network 10.0.0.68 0.0.0.3 area 0
 redistribute static subnets
-
 end
-write memory
+wr
 
 ```
 
 MS4
 ```bash
 enable
-configure terminal
+conf t
+hostname MS4
+no ip domain-lookup
 
-vtp domain Grupo15
-vtp password usac2025
-vtp mode client
-vtp version 2
+interface port-channel 1
+no switchport
+ip address 10.0.0.37 255.255.255.252
+no shutdown
+exit
 
-ip routing
+interface range fa0/4-6
+no switchport
+channel-group 1 mode active
+no shutdown
+exit
 
+interface port-channel 2
+no switchport
+ip address 10.0.0.33 255.255.255.252
+no shutdown
+exit
+
+interface range fa0/1-3
+no switchport
+channel-group 2 mode active
+no shutdown
+exit
+
+! Hacia R3
 interface fa0/7
 no switchport
 ip address 10.0.0.30 255.255.255.252
 no shutdown
-
-interface range fa0/1 - 3
-channel-group 9 mode active
 exit
-interface port-channel9
-no switchport
-ip address 10.0.0.34 255.255.255.252
-no shutdown
 
-interface range fa0/4 - 6
-channel-group 10 mode active
-exit
-interface port-channel10
-no switchport
-ip address 10.0.0.37 255.255.255.252
-no shutdown
+! Habilitación de routing
+ip routing
 
+! Configuración OSPF
 router ospf 1
 network 10.0.0.28 0.0.0.3 area 0
 network 10.0.0.32 0.0.0.3 area 0
 network 10.0.0.36 0.0.0.3 area 0
+exit
 
 end
-write memory
-
+wr
 ```
 
 MS6
 ```bash
 enable
-configure terminal
-
+conf t
+hostname MS6
+no ip domain-lookup
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
-vtp version 2
 
-ip routing
-
-interface range fa0/4 - 6
-channel-group 10 mode active
-exit
-interface port-channel10
-no switchport
-ip address 10.0.0.38 255.255.255.252
-no shutdown
-
-interface range fa0/1 - 3
-channel-group 12 mode active
-exit
-interface port-channel12
-no switchport
-ip address 10.0.0.46 255.255.255.252
-no shutdown
-
+! Hacia R4
 interface fa0/8
 no switchport
 ip address 10.0.0.49 255.255.255.252
 no shutdown
+exit
 
+! Hacia R5
 interface fa0/7
 no switchport
 ip address 10.0.0.53 255.255.255.252
 no shutdown
+exit
 
+interface port-channel 1
+no switchport
+ip address 10.0.0.38 255.255.255.252
+exit
+
+interface range fa0/4-6
+no switchport
+channel-group 1 mode active
+exit
+
+interface port-channel 2
+no switchport
+ip address 10.0.0.46 255.255.255.252
+no sh 
+exit
+
+interface range fa0/1-3
+no switchport
+channel-group 2 mode active
+no sh
+exit
+
+! Habilitación de routing
+ip routing
+
+! Configuración OSPF
 router ospf 1
-network 10.0.0.36 0.0.0.3 area 0
-network 10.0.0.44 0.0.0.3 area 0
-network 10.0.0.48 0.0.0.3 area 0
+network 192.158.15.0 0.0.0.127 area 0
+network 192.158.15.128 0.0.0.63 area 0
+network 192.158.15.192 0.0.0.31 area 0
+network 192.158.15.224 0.0.0.15 area 0
 network 10.0.0.52 0.0.0.3 area 0
+network 10.0.0.44 0.0.0.3 area 0
+network 10.0.0.36 0.0.0.3 area 0
+network 10.0.0.48 0.0.0.3 area 0
+exit
 
 end
-write memory
+wr
 
 ```
 
 R3
 ```bash
 enable
-configure terminal
+conf t
+hostname R3
+no ip domain-lookup
 
-interface GigabitEthernet0/1
-ip address 10.0.0.26 255.255.255.252
-no shutdown
-
-interface GigabitEthernet0/0
+! Hacia MS4
+interface gi0/0
 ip address 10.0.0.29 255.255.255.252
 no shutdown
+exit
 
+! Hacia R2
+interface gi0/1
+ip address 10.0.0.26 255.255.255.252
+no shutdown
+exit
+
+! Configuración OSPF
 router ospf 1
 network 10.0.0.24 0.0.0.3 area 0
 network 10.0.0.28 0.0.0.3 area 0
+exit
 
 end
-write memory
+wr
 
 ```
 
 R2
 ```bash
 enable
-configure terminal
+conf t
+hostname R2
+no ip domain-lookup
 
-interface Serial0/0/1
+! Interfaces seriales existentes con RIP
+interface s0/0/0
+ip address 10.0.0.22 255.255.255.252
+no shutdown
+exit
+
+interface s0/0/1
 ip address 10.0.0.18 255.255.255.252
 no shutdown
+exit
 
-interface Serial0/0/0
-ip address 10.0.0.21 255.255.255.252
-clock rate 64000
-no shutdown
-
-interface GigabitEthernet0/0
+! Interfaz hacia R3 con OSPF
+interface gi0/0
 ip address 10.0.0.25 255.255.255.252
 no shutdown
+exit
 
+! Configuración RIP
 router rip
 version 2
-network 10.0.0.0
-redistribute ospf 1
+network 10.0.0.16
+network 10.0.0.20
 no auto-summary
+redistribute ospf 1 metric 1
+exit
 
+! Configuración OSPF con redistribución desde RIP
 router ospf 1
 network 10.0.0.24 0.0.0.3 area 0
 redistribute rip subnets
+exit
 
 end
-write memory
+wr
 
 ```
 
 R1
 ```bash
 enable
-configure terminal
+conf t
+hostname R1
+no ip domain-lookup
 
-interface GigabitEthernet0/0
-ip address 10.0.0.9 255.255.255.252
+! hacia MS3
+interface gi0/0
+ip address 10.0.0.10 255.255.255.252
 no shutdown
+exit
 
-interface Serial0/0/0
+! serial hacia R0
+interface s0/0/0
 ip address 10.0.0.13 255.255.255.252
 no shutdown
+exit
 
-interface Serial0/0/1
+! serial hacia R2
+interface s0/0/1
 ip address 10.0.0.21 255.255.255.252
-clock rate 64000
 no shutdown
+exit
 
+! Configuración RIP
 router rip
 version 2
 network 10.0.0.0
 no auto-summary
+exit
 
 end
-write memory
-
+wr
 ```
 
 R0
 ```bash
 enable
-configure terminal
+conf t
+hostname R0
+no ip domain-lookup
 
-ip routing
+! Hacia SW2
+interface gi0/0
+no shutdown 
+exit
 
-interface GigabitEthernet0/0.13
-encapsulation dot1Q 13
-ip address 192.148.15.129 255.255.255.192
-no shutdown
-
-interface GigabitEthernet0/0.23
-encapsulation dot1Q 23
-ip address 192.148.15.193 255.255.255.224
-no shutdown
-
-interface GigabitEthernet0/0.33
-encapsulation dot1Q 33
-ip address 192.148.15.225 255.255.255.240
-no shutdown
-
-interface GigabitEthernet0/0.43
+interface gi0/0.43
 encapsulation dot1Q 43
 ip address 192.148.15.1 255.255.255.128
-no shutdown
+exit
 
-interface GigabitEthernet0/0
-no shutdown
+interface gi0/0.13
+encapsulation dot1Q 13
+ip address 192.148.15.129 255.255.255.192
+exit
 
-interface Serial0/0/0
+interface gi0/0.23
+encapsulation dot1Q 23
+ip address 192.148.15.193 255.255.255.224
+exit
+
+interface gi0/0.33
+encapsulation dot1Q 33
+ip address 192.148.15.225 255.255.255.240
+exit
+
+! Hacia R1
+interface s0/0/1
 ip address 10.0.0.14 255.255.255.252
 no shutdown
+exit
 
-interface Serial0/0/1
+! Hacia R2
+interface s0/0/0
 ip address 10.0.0.17 255.255.255.252
-clock rate 64000
 no shutdown
+exit
 
+! Configuración RIP
 router rip
 version 2
 network 10.0.0.0
 network 192.148.15.0
 no auto-summary
+exit
 
 end
-write memory
+wr
 
 ```
 
 MS3
 ```bash
 enable
-configure terminal
+conf t
+hostname MS3
+no ip domain-lookup
 
-vtp domain Grupo15
-vtp password usac2025
-vtp mode client
-
-ip routing
-
+! hacia MS1
 interface fa0/2
 no switchport
 ip address 10.0.0.2 255.255.255.252
 no shutdown
+exit
 
+! hacia MS2
 interface fa0/3
 no switchport
 ip address 10.0.0.6 255.255.255.252
 no shutdown
+exit
 
+! hacia R1
 interface fa0/1
-no switchport
-ip address 10.0.0.10 255.255.255.252
+no switchport 
+ip address 10.0.0.9 255.255.255.252
 no shutdown
+exit
 
+! Habilitacion de routing
+ip routing
+
+! Configuracion RIP
 router rip
 version 2
 network 10.0.0.0
+network 172.16.15.0
 no auto-summary
+exit
 
 end
-write memory
+wr
 
 ```
 
 MS1
 ```bash
 enable
-configure terminal
-
+conf t
+hostname MS1
+no ip domain-lookup
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
-ip routing
+interface fa0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+no shutdown
+exit
 
+! Configuración de interfaces VLAN con HSRP (sin cambios)
+
+interface vlan 13
+ip address 172.16.15.2 255.255.255.192
+standby 13 ip 172.16.15.1
+standby 13 priority 150
+standby 13 preempt
+no shutdown
+exit
+
+interface vlan 43
+ip address 172.16.15.66 255.255.255.192
+standby 43 ip 172.16.15.65
+standby 43 priority 150
+standby 43 preempt
+no shutdown
+exit
+
+interface vlan 23
+ip address 172.16.15.130 255.255.255.192
+standby 23 ip 172.16.15.129
+standby 23 priority 150
+standby 23 preempt
+no shutdown
+exit
+
+interface vlan 33
+ip address 172.16.15.194 255.255.255.248
+standby 33 ip 172.16.15.193
+standby 33 priority 150
+standby 33 preempt
+no shutdown
+exit
+
+! configuración hacia el MS3
 interface fa0/1
 no switchport
 ip address 10.0.0.1 255.255.255.252
 no shutdown
+exit
 
-interface fa0/2
-switchport mode trunk
-no shutdown
+! Habilitacion de routing
+ip routing 
 
+! Configuración RIP
 router rip
 version 2
+network 172.16.15.0
 network 10.0.0.0
 no auto-summary
+exit
 
 end
-write memory
-
+wr
 ```
 
 MS2
 ```bash
 enable
-configure terminal
-
+conf t
+hostname MS2
+no ip domain-lookup
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
-ip routing
+interface fa0/2
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+no shutdown
+exit
 
+! Configuración de interfaces VLAN con HSRP
+
+interface vlan 13
+ip address 172.16.15.3 255.255.255.192
+standby 13 ip 172.16.15.1
+no shutdown
+exit
+
+interface vlan 43
+ip address 172.16.15.67 255.255.255.192
+standby 43 ip 172.16.15.65
+no shutdown
+exit
+
+interface vlan 23
+ip address 172.16.15.131 255.255.255.192
+standby 23 ip 172.16.15.129
+no shutdown
+exit
+
+interface vlan 33
+ip address 172.16.15.195 255.255.255.248
+standby 33 ip 172.16.15.193
+no shutdown
+exit
+
+!configuracion hacia el MS3
 interface fa0/1
 no switchport
 ip address 10.0.0.5 255.255.255.252
 no shutdown
+exit
 
-interface fa0/2
-switchport mode trunk
-no shutdown
+! Habilitacion de routing
+ip routing
 
+! Configuración RIP
 router rip
 version 2
+network 172.16.15.0
 network 10.0.0.0
 no auto-summary
+exit
 
 end
-write memory
+wr
 
 ```
 
@@ -1140,14 +1320,12 @@ CUNOC
 MS0
 ```bash
 enable
-configure terminal
-
+conf t
+hostname MS0
+vtp version 2 
+vtp mode server
 vtp domain Grupo15
 vtp password usac2025
-vtp mode server
-
-ip routing
-
 vlan 13
 name Estudiantes
 vlan 23
@@ -1157,115 +1335,84 @@ name Seguridad
 vlan 43
 name Biblioteca
 
-interface vlan 13
-ip address 172.16.15.65 255.255.255.192
-no shutdown
-
-interface vlan 23
-ip address 172.16.15.129 255.255.255.192
-no shutdown
-
-interface vlan 33
-ip address 172.16.15.193 255.255.255.248
-no shutdown
-
-! Si deseas enrutar Biblioteca localmente, descomenta esta parte
-! interface vlan 43
-! ip address 172.16.15.1 255.255.255.128
-! no shutdown
-
-interface range fa0/3 - 5
+interface range fa0/1-5
+switchport trunk encapsulation dot1q
 switchport mode trunk
-
-interface fa0/1
-no switchport
-ip address 10.0.0.1 255.255.255.252
-no shutdown
-
-interface fa0/2
-no switchport
-ip address 10.0.0.5 255.255.255.252
-no shutdown
-
-router rip
-version 2
-network 10.0.0.0
-network 172.16.15.0
-no auto-summary
-
-end
-write memory
+switchport trunk allowed vlan 13,23,33,43
+exit
+exit
+wr
 
 ```
 
 SW0 
 ```bash
 enable
-configure terminal
-
+conf t 
+hostname SW0
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
-interface fa0/3
+interface range fa0/2-3
 switchport mode access
 switchport access vlan 23
-
-interface fa0/2
-switchport mode access
-switchport access vlan 23
+exit
 
 interface fa0/1
 switchport mode trunk
-
-end
-write memory
-
+switchport trunk allowed vlan 13,23,33,43
+exit
+exit
+wr
 ```
 
 SW9
 ```bash
 enable
-configure terminal
-
+conf t 
+hostname SW9
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
 interface fa0/2
 switchport mode access
 switchport access vlan 33
+exit
 
 interface fa0/1
 switchport mode trunk
-
-end
-write memory
+switchport trunk allowed vlan 13,23,33,43
+exit
+exit
+wr
 
 ```
 
 SW1
 ```bash
 enable
-configure terminal
-
+conf t 
+hostname SW1
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
-interface fa0/2
+interface range fa0/2-3
 switchport mode access
 switchport access vlan 13
-
-interface fa0/3
-switchport mode access
-switchport access vlan 13
+exit
 
 interface fa0/1
 switchport mode trunk
-
-end
-write memory
+switchport trunk allowed vlan 13,23,33,43
+exit
+exit
+wr
 
 ```
 
@@ -1273,158 +1420,167 @@ CUM
 R4
 ```bash
 enable
-configure terminal
+conf t
+hostname R4
+no ip domain-lookup
 
-interface GigabitEthernet0/0
-ip address 10.0.0.50 255.255.255.252
+! Interfaz hacia SW5 para VLANs
+interface gi0/1
 no shutdown
+exit
 
-interface GigabitEthernet0/1.13
+! HSRP (primario)
+interface gi0/1.13
 encapsulation dot1Q 13
-ip address 192.158.15.129 255.255.255.192
-standby 13 ip 192.158.15.126
-standby 13 priority 110
+ip address 192.158.15.130 255.255.255.192
+standby 13 ip 192.158.15.129
+standby 13 priority 150
 standby 13 preempt
 no shutdown
+exit
 
-interface GigabitEthernet0/1.23
+interface gi0/1.23
 encapsulation dot1Q 23
-ip address 192.158.15.193 255.255.255.224
-standby 23 ip 192.158.15.190
-standby 23 priority 110
+ip address 192.158.15.194 255.255.255.224
+standby 23 ip 192.158.15.193
+standby 23 priority 150
 standby 23 preempt
 no shutdown
+exit
 
-interface GigabitEthernet0/1.33
+interface gi0/1.33
 encapsulation dot1Q 33
-ip address 192.158.15.225 255.255.255.240
-standby 33 ip 192.158.15.254
-standby 33 priority 110
+ip address 192.158.15.226 255.255.255.240
+standby 33 ip 192.158.15.225
+standby 33 priority 150
 standby 33 preempt
 no shutdown
+exit
 
-interface GigabitEthernet0/1.43
+interface gi0/1.43
 encapsulation dot1Q 43
-ip address 192.158.15.1 255.255.255.128
-standby 43 ip 192.158.15.3
-standby 43 priority 110
+ip address 192.158.15.2 255.255.255.128
+standby 43 ip 192.158.15.1
+standby 43 priority 150
 standby 43 preempt
 no shutdown
+exit
 
-interface GigabitEthernet0/1
-no shutdown
+! Interfaz hacia MS6 para VLANs
+interface gi0/0
+ip address 10.0.0.50 255.255.255.252
+no shutdown 
+exit
 
+! Configuración OSPF
 router ospf 1
+network 192.158.15.0 0.0.0.127 area 0
+network 192.158.15.128 0.0.0.63 area 0
+network 192.158.15.192 0.0.0.31 area 0
+network 192.158.15.224 0.0.0.15 area 0
 network 10.0.0.48 0.0.0.3 area 0
-network 192.158.15.0 0.0.0.255 area 0
+exit
 
 end
-write memory
+wr
 
 ```
 
 R5
 ```bash
 enable
-configure terminal
+conf t
+hostname R5
+no ip domain-lookup
 
-interface GigabitEthernet0/0
+! Interfaz hacia MS6
+interface gi0/0
 ip address 10.0.0.54 255.255.255.252
 no shutdown
+exit
 
-interface GigabitEthernet0/1.13
+! HSRP (secundaria)
+interface gi0/1.13
 encapsulation dot1Q 13
-ip address 192.158.15.130 255.255.255.192
-standby 13 ip 192.158.15.126
-standby 13 priority 100
-standby 13 preempt
-no shutdown
+ip address 192.158.15.131 255.255.255.192
+standby 13 ip 192.158.15.129
+exit
 
-interface GigabitEthernet0/1.23
+interface gi0/1.23
 encapsulation dot1Q 23
-ip address 192.158.15.194 255.255.255.224
-standby 23 ip 192.158.15.190
-standby 23 priority 100
-standby 23 preempt
-no shutdown
+ip address 192.158.15.195 255.255.255.224
+standby 23 ip 192.158.15.193
+exit
 
-interface GigabitEthernet0/1.33
+interface gi0/1.33
 encapsulation dot1Q 33
-ip address 192.158.15.226 255.255.255.240
-standby 33 ip 192.158.15.254
-standby 33 priority 100
-standby 33 preempt
-no shutdown
+ip address 192.158.15.227 255.255.255.240
+standby 33 ip 192.158.15.225
+exit
 
-interface GigabitEthernet0/1.43
+interface gi0/1.43
 encapsulation dot1Q 43
-ip address 192.158.15.2 255.255.255.128
-standby 43 ip 192.158.15.3
-standby 43 priority 100
-standby 43 preempt
-no shutdown
+ip address 192.158.15.3 255.255.255.128
+standby 43 ip 192.158.15.1
+exit
 
-interface GigabitEthernet0/1
+! Interfaz hacia SW5 para VLANs
+interface gi0/1
 no shutdown
+exit
 
+! Configuración OSPF
 router ospf 1
+network 192.158.15.0 0.0.0.127 area 0
+network 192.158.15.128 0.0.0.63 area 0
+network 192.158.15.192 0.0.0.31 area 0
+network 192.158.15.224 0.0.0.15 area 0
 network 10.0.0.52 0.0.0.3 area 0
-network 192.158.15.0 0.0.0.255 area 0
+exit
 
 end
-write memory
-
+wr
 ```
 
 SW5
 ```bash
 enable
-configure terminal
-
-vtp domain Grupo15
+conf t
+hostname SW5
+vtp version 2
+vtp mode server
+vtp domain Grupo5
 vtp password usac2025
-vtp mode transparent
-
-vlan 13
+vlan 14
 name Estudiantes
-exit
-
-vlan 23
+vlan 24
 name Docentes
-exit
-
-vlan 33
+vlan 34
 name Seguridad
-exit
-
-vlan 43
+vlan 44
 name Biblioteca
+interface range fa0/1-2
+switchport mode trunk
+switchport trunk allowed vlan 14,24,34,44
 exit
-
-interface fa0/4
-switchport mode access
-switchport access vlan 13
-
-interface fa0/6
-switchport mode access
-switchport access vlan 23
-
-interface fa0/5
-switchport mode access
-switchport access vlan 33
-
 interface fa0/3
 switchport mode access
-switchport access vlan 43
-
-interface fa0/1
-switchport mode trunk
-
-interface fa0/2
-switchport mode trunk
-
-end
-write memory
+switchport access vlan 14
+exit
+interface fa0/4
+switchport mode access
+switchport access vlan 24
+exit
+interface fa0/5
+switchport mode access
+switchport access vlan 34
+exit
+interface fa0/6
+switchport mode access
+switchport access vlan 44
+exit
+exit
+wr
 
 ```
 
@@ -1432,70 +1588,82 @@ CENTRAL
 R7
 ```bash
 enable
-configure terminal
+conf t
+hostname R7
+no ip domain-lookup
 
-ip routing
-
-interface GigabitEthernet0/1.53
-encapsulation dot1Q 53
-ip address 192.123.15.1 255.255.255.192
-no shutdown
-
-interface GigabitEthernet0/1.63
-encapsulation dot1Q 63
-ip address 192.123.15.66 255.255.255.192
-no shutdown
-
-interface GigabitEthernet0/1.73
-encapsulation dot1Q 73
-ip address 192.123.15.130 255.255.255.248
-no shutdown
-
-interface GigabitEthernet0/1
-no shutdown
-
-interface GigabitEthernet0/0
+interface gi0/0
 ip address 10.0.0.69 255.255.255.252
-no shutdown
+no shutdown 
+exit
 
-ip route 192.168.15.0 255.255.255.0 10.0.0.70
-ip route 192.148.15.0 255.255.255.0 10.0.0.70
-ip route 172.16.15.0 255.255.255.0 10.0.0.70
-ip route 192.158.15.0 255.255.255.0 10.0.0.70
-ip route 10.0.0.0 255.255.255.0 10.0.0.70
+interface gi0/1
+no shutdown
+exit
+
+! Subinterfaces para cada VLAN
+interface gi0/1.53
+encapsulation dot1Q 53
+ip address 192.120.15.1 255.255.255.0
+exit
+
+interface gi0/1.63
+encapsulation dot1Q 63
+ip address 192.121.15.1 255.255.255.0
+exit
+
+interface gi0/1.73
+encapsulation dot1Q 73
+ip address 192.122.15.1 255.255.255.0
+exit
+
+! Ruta y mascara predeterminada, comodin
+ip route 0.0.0.0 0.0.0.0 10.0.0.70
+
+ip routing 
 
 end
-write memory
-
+wr
 ```
 
 switch0
 ```bash
 enable
-configure terminal
-
+conf t
+hostname Switch0
+vtp version 2 
+vtp mode server
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
-interface fa0/2
-switchport mode access
-switchport access vlan 63
+vlan 53
+name Server0
+vlan 63
+name Server1
+vlan 73
+
+name Server2
+interface fa0/1
+switchport mode trunk
+switchport trunk allowed vlan 53,63,73
+exit
 
 interface fa0/3
 switchport mode access
 switchport access vlan 53
+exit
+
+interface fa0/2
+switchport mode access
+switchport access vlan 63
+exit
 
 interface fa0/4
 switchport mode access
 switchport access vlan 73
-
-interface fa0/1
-switchport mode trunk
-
-end
-write memory
-
+exit
+exit
+wr
 
 ```
 
@@ -1503,32 +1671,42 @@ CUNOROC
 SW2
 ```bash
 enable
-configure terminal
-
+conf t
+hostname SW2 
+vtp version 2 
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
 interface fa0/1
 switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+exit
+
+interface fa0/2
+switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+exit
 
 interface fa0/3
 switchport mode access
 switchport access vlan 23
+exit
+exit
+wr
 
-end
-write memory
 
 ```
 
 SW3
 ```bash
 enable
-configure terminal
-
+conf t
+hostname SW3
+vtp version 2
+vtp mode server 
 vtp domain Grupo15
 vtp password usac2025
-vtp mode server
 
 vlan 13
 name Estudiantes
@@ -1539,43 +1717,46 @@ name Seguridad
 vlan 43
 name Biblioteca
 
-interface fa0/1
+interface range fa0/1-2
 switchport mode trunk
-
-interface fa0/2
-switchport mode trunk
+switchport trunk allowed vlan 13,23,33,43
+exit
 
 interface fa0/3
 switchport mode access
 switchport access vlan 13
-
-end
-write memory
+exit
+exit
+wr
 
 ```
 
 SW4
 ```bash
 enable
-configure terminal
-
+conf t 
+hostname SW4
+vtp version 2
+vtp mode client
 vtp domain Grupo15
 vtp password usac2025
-vtp mode client
 
 interface fa0/1
 switchport mode trunk
-
-interface fa0/2
-switchport mode access
-switchport access vlan 43
+switchport trunk allowed vlan 13,23,33,43
+exit
 
 interface fa0/3
 switchport mode access
 switchport access vlan 33
+exit
 
-end
-write memory
+interface fa0/2
+switchport mode access
+switchport access vlan 43
+exit
 
+exit
+wr
 ```
 
